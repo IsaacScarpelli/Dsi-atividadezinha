@@ -15,7 +15,7 @@ mongoose
   .catch((err) => console.log(err));
 
 //Rotas
-app.use("api/products", productRoutes);
+app.use("/api/products", productRoutes);
 
 //Inicializador servidor
 const PORT = process.env.PORT || 3000;
