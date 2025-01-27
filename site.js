@@ -1,0 +1,188 @@
+module.exports = function (){
+    return `
+   <!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Produtos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f4f4f9;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .form-container {
+      margin-bottom: 30px;
+    }
+    .form-container input, .form-container button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .product-list {
+      margin-top: 30px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .error {
+      color: red;
+    }
+    .success {
+      color: green;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Gestão de Produtos</h1>
+
+    <!-- Formulário para adicionar produto -->
+    <div class="form-container">
+      <h3>Adicionar Novo Produto</h3>
+      <input type="text" id="nome" placeholder="Nome do Produto" required>
+      <input type="text" id="tipo" placeholder="Tipo do Produto" required>
+      <input type="number" id="quantidade" placeholder="Quantidade" required>
+      <button onclick="adicionarProduto()">Cadastrar Produto</button>
+      <p id="error" class="error"></p>
+      <p id="success" class="success"></p>
+    </div>
+
+    <!-- Botão para consultar estoque total -->
+    <div>
+      <button onclick="consultarEstoque()">Consultar Estoque Total</button>
+      <p id="estoque-total"></p>
+    </div>
+
+    <!-- Lista de produtos -->
+    <div class="product-list">
+      <h3>Produtos Cadastrados</h3>
+      <table id="product-table">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Tipo</th>
+            <th>Quantidade</th>
+          </tr>
+        </thead>
+        <tbody id="product-list">
+          <!-- Lista de produtos será inserida aqui -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    async function adicionarProduto() {
+      const nome = document.getElementById('nome').value;
+      const tipo = document.getElementById('tipo').value;
+      const quantidade = parseInt(document.getElementById('quantidade').value);
+
+      if (quantidade < 0) {
+        document.getElementById('error').textContent = "Quantidade inválida.";
+        return;
+      }
+
+      const produto = { nome, tipo, quantidade };
+
+      try {
+        const response = await fetch('http://localhost:3000/api/products', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(produto),
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          document.getElementById('success').textContent = 'Produto cadastrado com sucesso!';
+          document.getElementById('error').textContent = '';
+          document.getElementById('nome').value = '';
+          document.getElementById('tipo').value = '';
+          document.getElementById('quantidade').value = '';
+          listarProdutos();
+        } else {
+          document.getElementById('error').textContent = data.error;
+          document.getElementById('success').textContent = '';
+        }
+      } catch (error) {
+        document.getElementById('error').textContent = 'Erro ao cadastrar produto.';
+        console.error(error);
+      }
+    }
+
+    async function listarProdutos() {
+      try {
+        const response = await fetch('http://localhost:3000/api/products');
+        const data = await response.json();
+        
+        const tbody = document.getElementById('product-list');
+        tbody.innerHTML = '';
+        
+        data.forEach(product => {
+          const row = document.createElement('tr');
+          row.innerHTML = "
+            <td>${product.nome}</td>
+            <td>${product.tipo}</td>
+            <td>${product.quantidade}</td>
+          ";
+          tbody.appendChild(row);
+        });
+      } catch (error) {
+        console.error('Erro ao listar produtos:', error);
+      }
+    }
+
+    async function consultarEstoque() {
+      try {
+        const response = await fetch('http://localhost:3000/api/products/total');
+        const data = await response.json();
+        document.getElementById('estoque-total').textContent = "Estoque Total: ${data.total}";
+      } catch (error) {
+        document.getElementById('estoque-total').textContent = 'Erro ao consultar estoque.';
+        console.error('Erro ao consultar estoque:', error);
+      }
+    }
+
+    // Carregar os produtos ao iniciar a página
+    window.onload = listarProdutos;
+  </script>
+
+</body>
+</html>
+
+  `;
+}
