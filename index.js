@@ -1,39 +1,27 @@
-  require("dotenv").config();
-  const express = require("express");
-  const mongoose = require("mongoose");
-  const productRoutes = require("./routes/productRoutes");
-  const site = require('./site.js');
+require("dotenv").config();
+const express = require("express");
+const mongoose = require("mongoose");
+const productRoutes = require("./routes/productRoutes");
+const path = require("path");
 
-  const app = express();
+const app = express();
 
-  // Middleware
-  app.use(express.json());
+//Midlewaer
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
 
-  // Conectando ao MongoDB
-  mongoose
-    .connect(process.env.MONGO_URI)
-    .then(() => console.log("Conectado ao MongoDB"))
-    .catch((err) => console.log("Erro ao conectar ao MongoDB:", err));
+app.use(express.json());
 
-  // Rotas
+//Conectando ao MongoDB
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("Conectado ao MongoDB"))
+  .catch((err) => console.log(err));
 
-  // Rota para a página do Admin
-  app.get('/admin/:id', (req, res) => {
-      const id = req.params.id;
-      res.send(site(id)); // Chamando a função 'site' e passando o 'id'
-  });
+//Rotas
+app.use("/api/products", productRoutes);
 
-  // Rota de API de produtos
-  app.use("/api/products", productRoutes);
-
-  // Rota principal
-  app.get('/', (req, res) => {
-    res.json({
-      text: "testando!"
-    });
-  });
-
-  // Inicializar o servidor
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
- 
+//Inicializador servidor
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));

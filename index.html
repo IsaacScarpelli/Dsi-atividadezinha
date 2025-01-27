@@ -1,6 +1,4 @@
-module.exports = function (){
-    return `
-   <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
@@ -148,10 +146,10 @@ module.exports = function (){
       try {
         const response = await fetch('http://localhost:3000/api/products');
         const data = await response.json();
-        
+
         const tbody = document.getElementById('product-list');
         tbody.innerHTML = '';
-        
+
         data.forEach(product => {
           const row = document.createElement('tr');
           row.innerHTML = "
@@ -183,6 +181,3 @@ module.exports = function (){
 
 </body>
 </html>
-
-  `;
-}
